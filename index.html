@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Song - Генератор музыки</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f1f1f1;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.8rem;
+            color: #6c63ff;
+        }
+        
+        .logo h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #6c63ff, #ff6b9d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        
+        .generator-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #6c63ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-icon {
+            color: #6c63ff;
+        }
+        
+        select, input, textarea {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 14px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #6c63ff;
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #6c63ff;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #6c63ff;
+            cursor: pointer;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(90deg, #6c63ff, #ff6b9d);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 18px 30px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 30px auto;
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .result-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .result-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.1rem;
+        }
+        
+        .result-content {
+            display: none;
+        }
+        
+        .generated-song-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .song-detail {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .song-detail h3 {
+            color: #6c63ff;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+            filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(12%);
+        }
+        
+        .visualization {
+            height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visualization::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.3), transparent);
+            animation: wave 3s infinite linear;
+        }
+        
+        @keyframes wave {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid #6c63ff;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .history-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .history-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .clear-history-btn {
+            background: linear-gradient(90deg, #ff4757, #ff3838);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .clear-history-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        .history-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s, opacity 0.3s;
+            position: relative;
+        }
+        
+        .history-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .history-item.removing {
+            opacity: 0.3;
+            transform: scale(0.95);
+        }
+        
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .history-item h4 {
+            color: #6c63ff;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+        
+        .delete-btn {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .history-item p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        
+        .history-item audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 40px 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-history i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.error {
+            background: rgba(231, 76, 60, 0.9);
+        }
+        
+        .notification button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .tech-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tech-tag {
+            background: rgba(108, 99, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .logo h1 {
+                font-size: 2.2rem;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .generated-song-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .notification {
+                min-width: 250px;
+                max-width: 300px;
+                left: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-music"></i>
+                <h1>Simple Song</h1>
+            </div>
+            <p class="tagline">Создавайте уникальную музыку с помощью искусственного интеллекта.</p>
+        </header>
+        
+        <main class="main-content">
+            <section class="generator-section">
+                <h2 class="section-title"><i class="fas fa-sliders-h control-icon"></i> Параметры генерации</h2>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="genre"><i class="fas fa-guitar control-icon"></i> Жанр музыки</label>
+                        <select id="genre">
+                            <option value="pop">Поп-музыка</option>
+                            <option value="rock">Рок</option>
+                            <option value="electronic">Электронная</option>
+                            <option value="jazz">Джаз</option>
+                            <option value="classical">Классическая</option>
+                            <option value="hiphop">Хип-хоп</option>
+                            <option value="ambient">Эмбиент</option>
+                            <option value="folk">Фолк</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="mood"><i class="fas fa-smile control-icon"></i> Настроение</label>
+                        <select id="mood">
+                            <option value="happy">Радостное</option>
+                            <option value="sad">Грустное</option>
+                            <option value="energetic">Энергичное</option>
+                            <option value="calm">Спокойное</option>
+                            <option value="epic">Эпическое</option>
+                            <option value="romantic">Романтическое</option>
+                            <option value="mysterious">Загадочное</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="duration"><i class="fas fa-clock control-icon"></i> Длительность (сек)</label>
+                        <div class="slider-container">
+                            <input type="range" id="duration" min="10" max="120" value="30" step="5">
+                            <span class="slider-value" id="duration-value">30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="tempo"><i class="fas fa-tachometer-alt control-icon"></i> Темп (BPM)</label>
+                        <div class="slider-container">
+                            <input type="range" id="tempo" min="60" max="200" value="120" step="5">
+                            <span class="slider-value" id="tempo-value">120</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="instruments"><i class="fas fa-drum control-icon"></i> Инструменты</label>
+                        <select id="instruments" multiple>
+                            <option value="piano">Пианино</option>
+                            <option value="guitar" selected>Гитара</option>
+                            <option value="drums" selected>Барабаны</option>
+                            <option value="bass">Бас</option>
+                            <option value="synth">Синтезатор</option>
+                            <option value="strings">Струнные</option>
+                            <option value="vocals">Вокал</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="lyrics"><i class="fas fa-pen control-icon"></i> Тема текста (опционально)</label>
+                        <textarea id="lyrics" placeholder="Опишите тему песни или оставьте пустым для инструментальной композиции..."></textarea>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" id="generate-btn">
+                    <i class="fas fa-magic"></i> Сгенерировать музыку
+                </button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Идет генерация музыки с помощью модели скрытой диффузии...</p>
+                    <p id="generation-step">Инициализация модели</p>
+                </div>
+            </section>
+            
+            <section class="result-section">
+                <h2 class="section-title"><i class="fas fa-music control-icon"></i> Результат генерации</h2>
+                
+                <div class="result-placeholder" id="result-placeholder">
+                    <i class="fas fa-headphones" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                    <p>Сгенерированная музыка появится здесь после запуска процесса создания</p>
+                </div>
+                
+                <div class="result-content" id="result-content">
+                    <div class="generated-song-info">
+                        <div class="song-detail">
+                            <h3>Информация о треке</h3>
+                            <p><strong>Название:</strong> <span id="song-title"></span></p>
+                            <p><strong>Жанр:</strong> <span id="song-genre"></span></p>
+                            <p><strong>Настроение:</strong> <span id="song-mood"></span></p>
+                            <p><strong>Длительность:</strong> <span id="song-duration"></span> сек</p>
+                        </div>
+                        
+                        <div class="song-detail">
+                            <h3>Параметры генерации</h3>
+                            <p><strong>Темп:</strong> <span id="song-tempo"></span> BPM</p>
+                            <p><strong>Инструменты:</strong> <span id="song-instruments"></span></p>
+                            <p><strong>Модель:</strong> Скрытая диффузия v2.1</p>
+                            <p><strong>Вероятность:</strong> <span id="song-confidence"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="song-detail">
+                        <h3>Аудиоплеер</h3>
+                        <audio controls class="audio-player" id="audio-player">
+                            Ваш браузер не поддерживает аудио элемент.
+                        </audio>
+                        <div class="visualization" id="visualization"></div>
+                    </div>
+                    
+                    <div class="song-detail">
+                        <h3>Сгенерированный текст (если есть)</h3>
+                        <p id="song-lyrics">Текст не был сгенерирован для этой композиции.</p>
+                    </div>
+                    
+                    <button class="generate-btn" id="save-btn" style="max-width: 250px; padding: 15px 25px; font-size: 1.1rem;">
+                        <i class="fas fa-download"></i> Сохранить трек
+                    </button>
+                </div>
+            </section>
+            
+            <section class="history-section">
+                <div class="history-header">
+                    <h2 class="section-title"><i class="fas fa-history control-icon"></i> История генераций</h2>
+                    <div class="history-controls">
+                        <button class="clear-history-btn" id="clear-all-btn">
+                            <i class="fas fa-trash-alt"></i> Очистить всю историю
+                        </button>
+                    </div>
+                </div>
+                <div class="history-items" id="history-items">
+                    <!-- История будет загружена из localStorage -->
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Simple Song - Генератор музыки на основе скрытой диффузии</p>
+            <p>Искусственный интеллект создает уникальные музыкальные композиции по заданным параметрам</p>
+            <div class="tech-info">
+                <div class="tech-tag">Скрытая диффузия</div>
+                <div class="tech-tag">Нейронные сети</div>
+                <div class="tech-tag">Генеративная модель</div>
+                <div class="tech-tag">AI музыка</div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Элементы DOM
+        const generateBtn = document.getElementById('generate-btn');
+        const loadingEl = document.getElementById('loading');
+        const resultPlaceholder = document.getElementById('result-placeholder');
+        const resultContent = document.getElementById('result-content');
+        const generationStep = document.getElementById('generation-step');
+        const historyItems = document.getElementById('history-items');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        
+        // Элементы для отображения результата
+        const songTitle = document.getElementById('song-title');
+        const songGenre = document.getElementById('song-genre');
+        const songMood = document.getElementById('song-mood');
+        const songDuration = document.getElementById('song-duration');
+        const songTempo = document.getElementById('song-tempo');
+        const songInstruments = document.getElementById('song-instruments');
+        const songConfidence = document.getElementById('song-confidence');
+        const songLyrics = document.getElementById('song-lyrics');
+        const audioPlayer = document.getElementById('audio-player');
+        const saveBtn = document.getElementById('save-btn');
+        
+        // Элементы управления
+        const durationSlider = document.getElementById('duration');
+        const durationValue = document.getElementById('duration-value');
+        const tempoSlider = document.getElementById('tempo');
+        const tempoValue = document.getElementById('tempo-value');
+        
+        // Обновление значений слайдеров
+        durationSlider.addEventListener('input', function() {
+            durationValue.textContent = this.value;
+        });
+        
+        tempoSlider.addEventListener('input', function() {
+            tempoValue.textContent = this.value;
+        });
+        
+        // Инициализация истории из localStorage
+        let generationHistory = JSON.parse(localStorage.getItem('simpleSongHistory')) || [];
+        renderHistory();
+        
+        // Функция для показа уведомления
+        function showNotification(message, type = 'success') {
+            // Удаляем предыдущие уведомления
+            document.querySelectorAll('.notification').forEach(el => el.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Автоматическое удаление через 5 секунд
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Функция для генерации случайного названия песни
+        function generateSongTitle(genre, mood) {
+            const prefixes = {
+                pop: ["Летний", "Звездный", "Радио", "Танцевальный", "Солнечный"],
+                rock: ["Гром", "Металл", "Скала", "Восстание", "Путь"],
+                electronic: ["Электро", "Космический", "Цифровой", "Пульс", "Волна"],
+                jazz: ["Полночь", "Дождь", "Синий", "Самоцвет", "Шепот"],
+                classical: ["Лунный", "Рассвет", "Элегия", "Соната", "Симфония"],
+                hiphop: ["Бит", "Ритм", "Улица", "Поток", "Восхождение"],
+                ambient: ["Тишина", "Эфир", "Туман", "Бездна", "Эхо"],
+                folk: ["Легенда", "Дорога", "Поле", "Река", "Ветер"]
+            };
+            
+            const suffixes = {
+                happy: ["мечты", "счастья", "улыбки", "праздника", "радости"],
+                sad: ["расставания", "одиночества", "воспоминаний", "грусти", "потери"],
+                energetic: ["энергии", "движения", "скорости", "мощи", "огня"],
+                calm: ["спокойствия", "умиротворения", "медитации", "тишины", "покоя"],
+                epic: ["героев", "битвы", "триумфа", "легенд", "судьбы"],
+                romantic: ["любви", "чувств", "страсти", "нежности", "сердца"],
+                mysterious: ["тайны", "загадки", "иллюзий", "снов", "призраков"]
+            };
+            
+            const genrePrefixes = prefixes[genre] || prefixes.pop;
+            const moodSuffixes = suffixes[mood] || suffixes.happy;
+            
+            const randomPrefix = genrePrefixes[Math.floor(Math.random() * genrePrefixes.length)];
+            const randomSuffix = moodSuffixes[Math.floor(Math.random() * moodSuffixes.length)];
+            
+            return `${randomPrefix} ${randomSuffix}`;
+        }
+        
+        // Функция для генерации текста песни
+        function generateLyrics(topic) {
+            if (!topic || topic.trim() === '') {
+                return null;
+            }
+            
+            const lyricsTemplates = [
+                `В мире ${topic}, где сны сплетаются в мелодию,\nИ каждый миг наполнен светом и гармонией.\nМы идем по пути, что сам себе создаем,\nВ ритме сердца, что бьется в такт с вселенной.`,
+                `О, ${topic}, ты как ветер, что несет перемены,\nТы как утро после долгой, темной ночи.\nВ каждом звуке есть частица вечности,\nВ каждой ноте - отражение души.`,
+                `Где-то там, за горизонтом ${topic},\nЖдут новые мелодии, еще не спетые песни.\nМы откроем двери в мир волшебных звуков,\nГде каждый аккорд рождает новые миры.`
+            ];
+            
+            return lyricsTemplates[Math.floor(Math.random() * lyricsTemplates.length)];
+        }
+        
+        // Функция для симуляции процесса генерации музыки
+        function simulateGeneration() {
+            const stepMessages = [
+                "Инициализация модели скрытой диффузии...",
+                "Загрузка музыкальных паттернов...",
+                "Анализ параметров генерации...",
+                "Создание латентного пространства...",
+                "Генерация музыкальных последовательностей...",
+                "Добавление инструментов и эффектов...",
+                "Финальная обработка и мастеринг...",
+                "Сохранение результата..."
+            ];
+            
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step < stepMessages.length) {
+                    generationStep.textContent = stepMessages[step];
+                    step++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 500);
+            
+            return interval;
+        }
+        
+        generateBtn.addEventListener('click', async function() {
+            // Получаем значения параметров
+            const genre = document.getElementById('genre').value;
+            const mood = document.getElementById('mood').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const tempo = parseInt(document.getElementById('tempo').value);
+            const instrumentsSelect = document.getElementById('instruments');
+            const selectedInstruments = Array.from(instrumentsSelect.selectedOptions).map(option => option.value);
+            const lyricsTopic = document.getElementById('lyrics').value;
+    
+            // Показываем индикатор загрузки
+            loadingEl.style.display = 'block';
+            resultPlaceholder.style.display = 'none';
+            resultContent.style.display = 'none';
+    
+            // Симуляция шагов
+            const generationInterval = simulateGeneration();
+    
+            try {
+                const response = await fetch('/generate-demo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ genre, mood, duration, tempo, instruments: selectedInstruments.join(', '), lyrics: lyricsTopic })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+    
+                clearInterval(generationInterval);
+                loadingEl.style.display = 'none';
+    
+                // Обновляем данные
+                const title = generateSongTitle(genre, mood);
+                songTitle.textContent = title;
+                songGenre.textContent = document.getElementById('genre').options[document.getElementById('genre').selectedIndex].text;
+                songMood.textContent = document.getElementById('mood').options[document.getElementById('mood').selectedIndex].text;
+                songDuration.textContent = duration;
+                songTempo.textContent = tempo;
+                songInstruments.textContent = selectedInstruments.map(instr => {
+                    const instrNames = { piano: "пианино", guitar: "гитара", drums: "барабаны", bass: "бас", synth: "синтезатор", strings: "струнные", vocals: "вокал" };
+                    return instrNames[instr] || instr;
+                }).join(', ');
+                songConfidence.textContent = (Math.random() * 30 + 70).toFixed(1) + '%';
+    
+                const generatedLyrics = generateLyrics(lyricsTopic);
+                if (generatedLyrics) {
+                    songLyrics.textContent = generatedLyrics;
+                } else {
+                    songLyrics.textContent = "Текст не был сгенерирован для этой композиции.";
+                }
+    
+                audioPlayer.src = data.audio_url;
+                resultContent.style.display = 'block';
+    
+                // Добавляем в историю
+                const newSong = {
+                    id: Date.now(),
+                    title: title,
+                    genre: genre,
+                    mood: mood,
+                    duration: duration,
+                    tempo: tempo,
+                    instruments: selectedInstruments,
+                    timestamp: new Date().toLocaleString('ru-RU'),
+                    audio_url: data.audio_url
+                };
+                
+                generationHistory.unshift(newSong);
+                if (generationHistory.length > 6) {
+                    generationHistory = generationHistory.slice(0, 6);
+                }
+                
+                localStorage.setItem('simpleSongHistory', JSON.stringify(generationHistory));
+                renderHistory();
+                showNotification('Трек успешно сгенерирован!');
+    
+            } catch (error) {
+                clearInterval(generationInterval);
+                loadingEl.style.display = 'none';
+                showNotification('Ошибка генерации: ' + error.message, 'error');
+            }
+        });
+        
+        // Функция для отображения истории
+        function renderHistory() {
+            if (generationHistory.length === 0) {
+                historyItems.innerHTML = `
+                    <div class="empty-history">
+                        <i class="fas fa-music"></i>
+                        <h4>История пуста</h4>
+                        <p>Сгенерируйте первую композицию, чтобы она появилась здесь</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyItems.innerHTML = generationHistory.map(song => `
+                <div class="history-item" id="history-item-${song.id}">
+                    <div class="history-item-header">
+                        <h4>${song.title}</h4>
+                        <button class="delete-btn" onclick="deleteSong(${song.id})" title="Удалить трек">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <p><strong>Жанр:</strong> ${getGenreName(song.genre)}</p>
+                    <p><strong>Настроение:</strong> ${getMoodName(song.mood)}</p>
+                    <p><strong>Темп:</strong> ${song.tempo} BPM</p>
+                    <p><strong>Время:</strong> ${song.timestamp}</p>
+                    <audio controls>
+                        <source src="${song.audio_url}" type="audio/wav">
+                        Ваш браузер не поддерживает аудио элемент.
+                    </audio>
+                </div>
+            `).join('');
+        }
+        
+        // Функция для удаления одного трека
+        function deleteSong(songId) {
+            const historyItem = document.getElementById(`history-item-${songId}`);
+            if (!historyItem) return;
+            
+            // Добавляем анимацию удаления
+            historyItem.classList.add('removing');
+            
+            // Даем время для анимации, затем удаляем
+            setTimeout(() => {
+                // Находим индекс элемента для удаления
+                const index = generationHistory.findIndex(song => song.id === songId);
+                
+                if (index !== -1) {
+                    // Удаляем из массива
+                    generationHistory.splice(index, 1);
+                    
+                    // Обновляем localStorage
+                    localStorage.setItem('simpleSongHistory', JSON.stringify(generationHistory));
+                    
+                    // Перерисовываем историю
+                    renderHistory();
+                    
+                    // Показываем уведомление
+                    showNotification('Трек удален из истории');
+                }
+            }, 300);
+        }
+        
+        // Функция для очистки всей истории
+        clearAllBtn.addEventListener('click', function() {
+            if (generationHistory.length === 0) {
+                showNotification('История уже пуста', 'error');
+                return;
+            }
+            
+            if (confirm(`Вы уверены, что хотите удалить все ${generationHistory.length} треков из истории?`)) {
+                // Анимация удаления всех элементов
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.classList.add('removing');
+                });
+                
+                setTimeout(() => {
+                    generationHistory = [];
+                    localStorage.setItem('simpleSongHistory', JSON.stringify(generationHistory));
+                    renderHistory();
+                    showNotification('Вся история очищена');
+                }, 300);
+            }
+        });
+        
+        // Вспомогательные функции для получения названий
+        function getGenreName(genreKey) {
+            const genres = {
+                pop: "Поп-музыка",
+                rock: "Рок",
+                electronic: "Электронная",
+                jazz: "Джаз",
+                classical: "Классическая",
+                hiphop: "Хип-хоп",
+                ambient: "Эмбиент",
+                folk: "Фолк"
+            };
+            return genres[genreKey] || genreKey;
+        }
+        
+        function getMoodName(moodKey) {
+            const moods = {
+                happy: "Радостное",
+                sad: "Грустное",
+                energetic: "Энергичное",
+                calm: "Спокойное",
+                epic: "Эпическое",
+                romantic: "Романтическое",
+                mysterious: "Загадочное"
+            };
+            return moods[moodKey] || moodKey;
+        }
+        
+        // Обработчик кнопки сохранения
+        saveBtn.addEventListener('click', function() {
+            // Создаем временную ссылку для скачивания
+            const link = document.createElement('a');
+            link.href = audioPlayer.src;
+            link.download = `simple-song-${Date.now()}.wav`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Трек начал скачиваться');
+        });
+        
+        // Инициализация визуализации
+        function initVisualization() {
+            const visualization = document.getElementById('visualization');
+            if (!visualization) return;
+            
+            const bars = 50;
+            
+            // Очищаем предыдущие элементы
+            visualization.innerHTML = '';
+            
+            for (let i = 0; i < bars; i++) {
+                const bar = document.createElement('div');
+                bar.style.position = 'absolute';
+                bar.style.bottom = '0';
+                bar.style.left = `${(i / bars) * 100}%`;
+                bar.style.width = `${100 / bars}%`;
+                bar.style.height = `${Math.random() * 80 + 20}%`;
+                bar.style.backgroundColor = `rgba(108, 99, 255, ${Math.random() * 0.5 + 0.3})`;
+                bar.style.borderRadius = '2px 2px 0 0';
+                
+                // Анимация
+                bar.style.animation = `wave 3s infinite linear`;
+                bar.style.animationDelay = `${Math.random() * 2}s`;
+                
+                visualization.appendChild(bar);
+            }
+        }
+        
+        // Запуск инициализации при загрузке страницы
+        window.addEventListener('load', function() {
+            initVisualization();
+            
+            // Обновляем визуализацию при изменении аудио
+            audioPlayer.addEventListener('play', function() {
+                // Можно добавить реакцию визуализации на воспроизведение
+            });
+        });
+    </script>
+</body>
+</html>
